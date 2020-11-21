@@ -140,8 +140,8 @@ void SubdivisionCurve::recomputeCurve() {
 
 QVector<QVector2D> subdivideCurve(QVector<QVector2D>& input, QVector<int>& odd, QVector<int>& even) {
     QVector<QVector2D> result;
-    //result.push_back(input.first());
-    /*
+    result.push_back(input.first());
+
     for (int i = 1; i < input.size(); ++ i) {
         int denominator = 0;
         for (int j = 0; j < even.size(); ++j) {
@@ -149,8 +149,17 @@ QVector<QVector2D> subdivideCurve(QVector<QVector2D>& input, QVector<int>& odd, 
         }
         QVector2D nominator = (input[i - 1] * even[0]) + (input[i] * even[1]);
         result.push_back(nominator / denominator);
-    }*/
 
-    //result.push_back(input.last());
+        if (i != input.size() - 1) {
+            int denominator = 0;
+            for (int j = 0; j < odd.size(); ++j) {
+                denominator += odd[j];
+            }
+            QVector2D nominator = (input[i - 1] * odd[0]) + (input[i] * odd[1]) + (input[i + 1] * odd[2]);
+            result.push_back(nominator / denominator);
+        }
+    }
+
+    result.push_back(input.last());
     return result;
 }

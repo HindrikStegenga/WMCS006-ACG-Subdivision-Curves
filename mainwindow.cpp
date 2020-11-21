@@ -11,9 +11,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     // Input restrictions for the Mask
     ui->subdivMask->setValidator(new QRegularExpressionValidator(QRegularExpression("(-?\\d+\\s)+(-?\\d+\\s?)")));
 
+
+
     // Initialise mask
     ui->mainView->subCurve.setMask(ui->subdivMask->text());
-
 }
 
 MainWindow::~MainWindow() {
@@ -28,6 +29,8 @@ void MainWindow::on_controlNet_toggled(bool checked) {
 
 void MainWindow::on_curvePoints_toggled(bool checked) {
     ui->mainView->settings.showCurvePts = checked;
+    ui->mainView->subCurve.recomputeCurve();
+    ui->mainView->updateBuffers();
     ui->mainView->update();
 }
 
@@ -35,11 +38,14 @@ void MainWindow::on_netPresets_currentIndexChanged(int index) {
     if (ui->mainView->isValid()) {
         ui->mainView->subCurve.presetNet(index);
     }
+    ui->mainView->subCurve.recomputeCurve();
     ui->mainView->updateBuffers();
 }
 
 void MainWindow::on_subdivMask_returnPressed() {
     ui->mainView->subCurve.setMask(ui->subdivMask->text());
+    ui->mainView->subCurve.recomputeCurve();
+    ui->mainView->updateBuffers();
     ui->mainView->update();
 }
 

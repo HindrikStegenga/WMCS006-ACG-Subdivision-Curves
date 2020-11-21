@@ -4,6 +4,7 @@ CurveRenderer::~CurveRenderer() {
 
 }
 
+QVector<QVector2D> computeAdjacencyBuffer(QVector<QVector2D> input);
 void CurveRenderer::init(QOpenGLFunctions_4_1_Core* f, Settings* s) {
     gl = f;
     settings = s;
@@ -21,7 +22,7 @@ void CurveRenderer::initShaders() {
     shaderProg->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shaders/fragshader.glsl");
 
     //add your geometry shader here
-    //shaderProg->addShaderFromSourceCode(QOpenGLShader::Geometry, ":/???");
+    shaderProg->addShaderFromSourceFile(QOpenGLShader::Geometry, ":/shaders/geomshader.glsl");
 
     shaderProg->link();
 }
@@ -47,28 +48,44 @@ void CurveRenderer::initBuffers() {
 
 void CurveRenderer::updateBuffers(SubdivisionCurve& sc) {
     QVector<QVector2D> netCoords = sc.getSubdivisionCoords();
+    netCoords = computeAdjacencyBuffer(netCoords);
 
     gl->glBindBuffer(GL_ARRAY_BUFFER, vbo);
     gl->glBufferData(GL_ARRAY_BUFFER, sizeof(QVector2D)*netCoords.size(), netCoords.data(), GL_DYNAMIC_DRAW);
 }
 
-
 void CurveRenderer::draw(SubdivisionCurve& sc) {
 
     QVector<QVector2D> netCoords = sc.getSubdivisionCoords();
+    netCoords = computeAdjacencyBuffer(netCoords);
+
     shaderProg->bind();
     shaderProg->setUniformValue("inputColor", 0.0, 1.0, 0.0);
 
     gl->glBindVertexArray(vao);
 
     // Draw control net
-    gl->glDrawArrays(GL_LINE_STRIP, 0, netCoords.size());
-    gl->glPointSize(3.0);
+    gl->glDrawArrays(GL_LINE_STRIP_ADJACENCY, 0, netCoords.size());
     gl->glLineWidth(3.0);
-    gl->glDrawArrays(GL_POINTS, 0, netCoords.size());
+    //gl->glDrawArrays(GL_POINTS, 0, netCoords.size());
 
     gl->glBindVertexArray(0);
 
 
     shaderProg->release();
+}
+
+QVector<QVector2D> computeAdjacencyBuffer(QVector<QVector2D> input) {
+    if(input.empty())
+        return input;
+
+    QVector<QVector2D> buffer;
+    buffer.push_back(input.first());
+
+    for(int i = 0; i < input.size(); ++i) {
+        //buffer.push_back(input[i - 1]);
+        buffer.push_back(input[i]);
+    }
+    buffer.push_back(input.back());
+    return buffer;
 }
