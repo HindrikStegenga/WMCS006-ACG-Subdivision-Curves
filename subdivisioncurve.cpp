@@ -2,6 +2,9 @@
 #include <QTextStream>
 #include <QDebug>
 
+
+QVector<QVector2D> subdivideCurve(QVector<QVector2D>& input, QVector<int>& odd, QVector<int>& even);
+
 SubdivisionCurve::SubdivisionCurve()
 {
 
@@ -57,16 +60,19 @@ void SubdivisionCurve::presetNet(int preset) {
 void SubdivisionCurve::addPoint(QVector2D p) {
     netCoords.append(p);
     //you should probably recalculate the curve
+    recomputeCurve();
 }
 
 void SubdivisionCurve::setPointPosition(int idx, QVector2D p) {
     netCoords[idx] = p;
     //you should probably recalculate the curve
+    recomputeCurve();
 }
 
 void SubdivisionCurve::removePoint(int idx) {
     netCoords.remove(idx);
     //you should probably recalculate the curve
+    recomputeCurve();
 }
 
 void SubdivisionCurve::setMask(QString stringMask) {
@@ -124,8 +130,27 @@ int SubdivisionCurve::findClosest(QVector2D p) {
 
 void SubdivisionCurve::recomputeCurve() {
 
-    for (size_t i = 0; i < 1; ++i) {
-
+    int subdivisions = this->lastSubdivisonSteps;
+    QVector<QVector2D> result = netCoords;
+    for (int i = 0; i < subdivisions; ++i) {
+        result = subdivideCurve(result, secondStencil, firstStencil);
     }
+    subdividedCurve = result;
+}
 
+QVector<QVector2D> subdivideCurve(QVector<QVector2D>& input, QVector<int>& odd, QVector<int>& even) {
+    QVector<QVector2D> result;
+    //result.push_back(input.first());
+    /*
+    for (int i = 1; i < input.size(); ++ i) {
+        int denominator = 0;
+        for (int j = 0; j < even.size(); ++j) {
+            denominator += even[j];
+        }
+        QVector2D nominator = (input[i - 1] * even[0]) + (input[i] * even[1]);
+        result.push_back(nominator / denominator);
+    }*/
+
+    //result.push_back(input.last());
+    return result;
 }

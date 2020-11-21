@@ -11,6 +11,7 @@ public:
     SubdivisionCurve();
 
     inline QVector<QVector2D> getNetCoords() { return netCoords; }
+    inline QVector<QVector2D> getSubdivisionCoords() { return subdividedCurve; }
 
     void setMask(QString stringMask);
     void presetNet(int preset);

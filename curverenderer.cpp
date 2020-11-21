@@ -46,7 +46,7 @@ void CurveRenderer::initBuffers() {
 }
 
 void CurveRenderer::updateBuffers(SubdivisionCurve& sc) {
-    QVector<QVector2D> netCoords = sc.getNetCoords();
+    QVector<QVector2D> netCoords = sc.getSubdivisionCoords();
 
     gl->glBindBuffer(GL_ARRAY_BUFFER, vbo);
     gl->glBufferData(GL_ARRAY_BUFFER, sizeof(QVector2D)*netCoords.size(), netCoords.data(), GL_DYNAMIC_DRAW);
@@ -55,21 +55,17 @@ void CurveRenderer::updateBuffers(SubdivisionCurve& sc) {
 
 void CurveRenderer::draw(SubdivisionCurve& sc) {
 
-    QVector<QVector2D> netCoords = sc.getNetCoords();
+    QVector<QVector2D> netCoords = sc.getSubdivisionCoords();
     shaderProg->bind();
+    shaderProg->setUniformValue("inputColor", 0.0, 1.0, 0.0);
 
     gl->glBindVertexArray(vao);
 
     // Draw control net
     gl->glDrawArrays(GL_LINE_STRIP, 0, netCoords.size());
-    gl->glPointSize(1.0);
+    gl->glPointSize(3.0);
+    gl->glLineWidth(3.0);
     gl->glDrawArrays(GL_POINTS, 0, netCoords.size());
-
-    // Highlight selected control point
-    if (settings->selectedPt > -1) {
-        gl->glPointSize(12.0);
-        gl->glDrawArrays(GL_POINTS, settings->selectedPt, 1);
-    }
 
     gl->glBindVertexArray(0);
 

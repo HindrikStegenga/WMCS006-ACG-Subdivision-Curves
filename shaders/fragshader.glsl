@@ -2,9 +2,10 @@
 // Fragment shader
 
 out vec4 fColor;
+uniform vec3 inputColor;
 
 void main() {
 
-  fColor = vec4(0.8, 0.0, 0.0, 1.0);
+  fColor = vec4(inputColor, 1.0);
 
 }

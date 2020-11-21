@@ -46,5 +46,6 @@ void MainWindow::on_subdivMask_returnPressed() {
 void MainWindow::on_subdivSteps_valueChanged(int arg1) {
     ui->mainView->subCurve.setSubdivisionSteps(arg1);
     ui->mainView->subCurve.recomputeCurve();
+    ui->mainView->updateBuffers();
     ui->mainView->update();
 }
