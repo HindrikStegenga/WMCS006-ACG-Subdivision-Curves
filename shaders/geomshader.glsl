@@ -2,22 +2,31 @@
 layout (lines_adjacency) in;
 layout (line_strip, max_vertices = 12) out;
 
-float computeCurvatureVertex(vec4 v0, vec4 v1, vec4 v2) {
-    float angle = acos( dot( normalize( v1 - v0), normalize(v2 - v0) ) );
-    return 2 * sin(angle) / length(normalize(v2) - normalize(v0));
+// Accepts two non-zero vectors, return curvature between them
+float computeCurvature(vec4 v0, vec4 v1) {
+    float angle = acos(dot(v0, v1));
+    return 2 * sin(angle) / length(v1 - v0);
 }
+
+
+struct VertOpNormal {
+    vec4 v0n;
+    vec4 v1n;
+    vec4 normal;
+    float curvature;
+};
 
 // Translates the to 0,0 with v1 at 0,0. Effectively turning v0 and v1 into vectors around the origin.
 // This allows us to use transformations to compute the appropariate vector we want.
 // Namely, the negated vector addition of v0 and v2. (i.e. the vector halfway but opposite direciton).
 // We compute the normalized variant of this so we can use this to generate a curvature mesh.
 // We need to guard for zero length vectors for normalizing as well.
-vec4 computeVertexOppositeNormal(vec4 v0, vec4 v1, vec4 v2) {
+VertOpNormal computeVertexOppositeNormal(vec4 v0, vec4 v1, vec4 v2) {
     vec4 zero_v0 = v1 - v0;
     vec4 zero_v2 = v1 - v2;
 
     if (!(length(zero_v0) > 0) || !(length(zero_v2) > 0)) {
-        return vec4(0);
+        return VertOpNormal(vec4(0), vec4(0), vec4(0), 0.0);
     }
 
     zero_v0 = normalize(zero_v0);
@@ -25,11 +34,13 @@ vec4 computeVertexOppositeNormal(vec4 v0, vec4 v1, vec4 v2) {
 
     vec4 zero_v0v2 = zero_v0 + zero_v2;
     if (!(length(zero_v0v2) > 0)) {
-        return vec4(0);
+        return VertOpNormal(vec4(0), vec4(0), vec4(0), 0.0);
     }
     zero_v0v2 = normalize(zero_v0v2);
-    float curvature = computeCurvatureVertex(zero_v0, vec4(0), zero_v2);
-    return zero_v0v2 * curvature;
+
+    float curvature = computeCurvature(zero_v0, zero_v2);
+
+    return VertOpNormal(zero_v0, zero_v2, zero_v0v2, curvature);
 }
 
 
@@ -55,10 +66,12 @@ void main() {
     gl_Position = v2;
     EmitVertex();
 
-    gl_Position = v2 + (1.5 * computeVertexOppositeNormal(v1,v2,v3));
+    VertOpNormal v1v3 = computeVertexOppositeNormal(v1,v2,v3);
+    gl_Position = v2 + v1v3.normal * v1v3.curvature;
     EmitVertex();
 
-    gl_Position = v1 + (1.5 * computeVertexOppositeNormal(v0,v1,v2));
+    VertOpNormal v0v2 = computeVertexOppositeNormal(v0,v1,v2);
+    gl_Position = v1 + v0v2.normal * v0v2.curvature;
     EmitVertex();
     gl_Position = v1;
     EmitVertex();
