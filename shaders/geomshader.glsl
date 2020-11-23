@@ -2,10 +2,37 @@
 layout (lines_adjacency) in;
 layout (line_strip, max_vertices = 12) out;
 
-float computeCurvatureVertex(vec2 v0, vec2 v1, vec2 v2) {
+float computeCurvatureVertex(vec4 v0, vec4 v1, vec4 v2) {
     float angle = acos( dot( normalize( v1 - v0), normalize(v2 - v0) ) );
     return 2 * sin(angle) / length(normalize(v2) - normalize(v0));
 }
+
+// Translates the to 0,0 with v1 at 0,0. Effectively turning v0 and v1 into vectors around the origin.
+// This allows us to use transformations to compute the appropariate vector we want.
+// Namely, the negated vector addition of v0 and v2. (i.e. the vector halfway but opposite direciton).
+// We compute the normalized variant of this so we can use this to generate a curvature mesh.
+// We need to guard for zero length vectors for normalizing as well.
+vec4 computeVertexOppositeNormal(vec4 v0, vec4 v1, vec4 v2) {
+    vec4 zero_v0 = v1 - v0;
+    vec4 zero_v2 = v1 - v2;
+
+    if (!(length(zero_v0) > 0) || !(length(zero_v2) > 0)) {
+        return vec4(0);
+    }
+
+    zero_v0 = normalize(zero_v0);
+    zero_v2 = normalize(zero_v2);
+
+    vec4 zero_v0v2 = zero_v0 + zero_v2;
+    if (!(length(zero_v0v2) > 0)) {
+        return vec4(0);
+    }
+    zero_v0v2 = normalize(zero_v0v2);
+    float curvature = computeCurvatureVertex(zero_v0, vec4(0), zero_v2);
+    return zero_v0v2 * curvature;
+}
+
+
 
 
 void main() {
@@ -23,39 +50,15 @@ void main() {
     // Otherwise UB will be triggered, and on my system geometry is not drawn.
     // Under normal circumstances this occurs on endpoint rendering for example.
 
-    bool v0_is_zero_div = true;
-    bool v3_is_zero_div = true;
-
-
-    // Transform to 0,0 in order to compute appropriate direction vector
-    vec2 zero_v0 = v1.xy - v0.xy;
-    if (zero_v0 != vec2(0)) { zero_v0 = normalize(zero_v0); v0_is_zero_div = false; }
-
-    vec2 zero_v2 = normalize(v1.xy - v2.xy);
-    vec2 zero_v0v2 = normalize(zero_v0 + zero_v2);
-
-    vec2 zero_v1 = normalize(v2.xy - v1.xy);
-    vec2 zero_v3 = v2.xy - v3.xy;
-    if (zero_v3 != vec2(0)) { zero_v3 = normalize(zero_v3); v3_is_zero_div = false; }
-
-    vec2 zero_v1v3 = normalize(zero_v1 + zero_v3);
-
     gl_Position = v1;
     EmitVertex();
     gl_Position = v2;
     EmitVertex();
 
-    if(v0_is_zero_div) {
-        zero_v1v3 = vec2(0);
-    }
-    if(v3_is_zero_div) {
-        zero_v0v2 = vec2(0);
-    }
-
-    gl_Position = v2 + vec4(0.1 * zero_v1v3, 0.0, 0.0);
+    gl_Position = v2 + (1.5 * computeVertexOppositeNormal(v1,v2,v3));
     EmitVertex();
 
-    gl_Position = v1 + vec4(0.1 * zero_v0v2, 0.0, 0.0);
+    gl_Position = v1 + (1.5 * computeVertexOppositeNormal(v0,v1,v2));
     EmitVertex();
     gl_Position = v1;
     EmitVertex();
