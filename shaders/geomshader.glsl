@@ -18,28 +18,37 @@ struct VertOpNormal {
 
 // Translates the to 0,0 with v1 at 0,0. Effectively turning v0 and v1 into vectors around the origin.
 // This allows us to use transformations to compute the appropariate vector we want.
-// Namely, the negated vector addition of v0 and v2. (i.e. the vector halfway but opposite direciton).
+// Namely, the vector addition of v0 and v2. (i.e. the vector halfway).
 // We compute the normalized variant of this so we can use this to generate a curvature mesh.
 // We need to guard for zero length vectors for normalizing as well.
+// It also computes the curvature of the given vectors, where v1 is origin.
+// Thus, it's the angle between v0 and v2 that's used for computing curvature.
 VertOpNormal computeVertexOppositeNormal(vec4 v0, vec4 v1, vec4 v2) {
     vec4 zero_v0 = v1 - v0;
     vec4 zero_v2 = v1 - v2;
 
+    // Check for zero magnitude, in such case we simply return 0.
+    // This has the effect of making curvature and length of the normal vector 0 as well.
     if (!(length(zero_v0) > 0) || !(length(zero_v2) > 0)) {
         return VertOpNormal(vec4(0), vec4(0), vec4(0), 0.0);
     }
 
+    // Normalize them now.
     zero_v0 = normalize(zero_v0);
     zero_v2 = normalize(zero_v2);
 
+    // Compute vector addition.
     vec4 zero_v0v2 = zero_v0 + zero_v2;
     if (!(length(zero_v0v2) > 0)) {
         return VertOpNormal(vec4(0), vec4(0), vec4(0), 0.0);
     }
+    // Normalize after check
     zero_v0v2 = normalize(zero_v0v2);
 
+    // Compute curvature
     float curvature = computeCurvature(zero_v0, zero_v2);
 
+    // Return struct containing values. Including normalized values for further computation.
     return VertOpNormal(zero_v0, zero_v2, zero_v0v2, curvature);
 }
 
@@ -55,11 +64,7 @@ void main() {
     vec4 v2 = gl_in[2].gl_Position;
     vec4 v3 = gl_in[3].gl_Position;
 
-
-    // We need to guard for zero divisions when normalizing.
-    // Therefore, we check this, if this is the case, our vertex normal length must be zero.
-    // Otherwise UB will be triggered, and on my system geometry is not drawn.
-    // Under normal circumstances this occurs on endpoint rendering for example.
+    // Compute the four positions we want to generate a line for.
 
     gl_Position = v1;
     EmitVertex();
