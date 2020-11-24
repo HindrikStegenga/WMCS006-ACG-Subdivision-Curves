@@ -1,11 +1,12 @@
 #version 410
 // Fragment shader
 
-out vec4 fColor;
-uniform vec3 inputColor;
+in VertexData {
+    vec4 color;
+} vIn;
+
+out vec4 out_color;
 
 void main() {
-
-  fColor = vec4(inputColor, 1.0);
-
+  out_color = vIn.color;
 }

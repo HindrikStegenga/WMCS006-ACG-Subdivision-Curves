@@ -8,7 +8,7 @@ QVector<QVector2D> computeAdjacencyBuffer(QVector<QVector2D> input);
 void CurveRenderer::init(QOpenGLFunctions_4_1_Core* f, Settings* s) {
     gl = f;
     settings = s;
-
+    currentShader = 2;
     initShaders();
     initBuffers();
 }
@@ -16,15 +16,33 @@ void CurveRenderer::init(QOpenGLFunctions_4_1_Core* f, Settings* s) {
 void CurveRenderer::initShaders() {
 
     //we use the qt wrapper functions for shader objects
-    shaderProg = new QOpenGLShaderProgram();
+    //This is the shader generating curvature combs
 
-    shaderProg->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shaders/vertshader.glsl");
-    shaderProg->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shaders/fragshader.glsl");
+    auto curvatureCombShader = new QOpenGLShaderProgram();
+    curvatureCombShader->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shaders/vertshader.glsl");
+    curvatureCombShader->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shaders/fragshader.glsl");
+    curvatureCombShader->addShaderFromSourceFile(QOpenGLShader::Geometry, ":/shaders/curvature_comb.glsl");
+    curvatureCombShader->link();
 
-    //add your geometry shader here
-    shaderProg->addShaderFromSourceFile(QOpenGLShader::Geometry, ":/shaders/geomshader.glsl");
+    shaders.append(curvatureCombShader);
 
-    shaderProg->link();
+    //This is the shader generating curvature colors
+    auto curvatureColorShader = new QOpenGLShaderProgram();
+    curvatureColorShader->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shaders/vertshader.glsl");
+    curvatureColorShader->addShaderFromSourceFile(QOpenGLShader::Geometry, ":/shaders/curvature_color.glsl");
+    curvatureColorShader->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shaders/fragshader.glsl");
+    curvatureColorShader->link();
+
+    shaders.append(curvatureColorShader);
+
+    //This is the shader generating curvature circles
+    auto curvatureCircleShader = new QOpenGLShaderProgram();
+    curvatureCircleShader->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shaders/vertshader.glsl");
+    curvatureCircleShader->addShaderFromSourceFile(QOpenGLShader::Geometry, ":/shaders/curvature_circle.glsl");
+    curvatureCircleShader->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shaders/fragshader.glsl");
+    curvatureCircleShader->link();
+
+    shaders.append(curvatureCircleShader);
 }
 
 void CurveRenderer::initBuffers() {
@@ -59,20 +77,22 @@ void CurveRenderer::draw(SubdivisionCurve& sc) {
     QVector<QVector2D> netCoords = sc.getSubdivisionCoords();
     netCoords = computeAdjacencyBuffer(netCoords);
 
-    shaderProg->bind();
-    shaderProg->setUniformValue("inputColor", 0.0, 1.0, 0.0);
+    // Bind shader program.
+    shaders[currentShader]->bind();
+    // Sadly I need to do name matching instead of by location.
+    // That's not supported on my system unfortunately.
+    shaders[currentShader]->setUniformValue("inputColor", 0.0, 1.0, 0.0, 1.0);
 
     gl->glBindVertexArray(vao);
 
     // Draw control net
     gl->glDrawArrays(GL_LINE_STRIP_ADJACENCY, 0, netCoords.size());
     gl->glLineWidth(3.0);
-    //gl->glDrawArrays(GL_POINTS, 0, netCoords.size());
 
     gl->glBindVertexArray(0);
 
 
-    shaderProg->release();
+    shaders[currentShader]->release();
 }
 
 QVector<QVector2D> computeAdjacencyBuffer(QVector<QVector2D> input) {

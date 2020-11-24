@@ -2,6 +2,8 @@
     <qresource prefix="/">
         <file>shaders/fragshader.glsl</file>
         <file>shaders/vertshader.glsl</file>
-        <file>shaders/geomshader.glsl</file>
+        <file>shaders/curvature_comb.glsl</file>
+        <file>shaders/curvature_color.glsl</file>
+        <file>shaders/curvature_circle.glsl</file>
     </qresource>
 </RCC>

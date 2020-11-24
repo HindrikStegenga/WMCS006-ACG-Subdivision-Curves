@@ -22,7 +22,8 @@ public:
 private:
 
     GLuint vao, vbo;
-    QOpenGLShaderProgram* shaderProg;
+    int currentShader;
+    QVector<QOpenGLShaderProgram*> shaders;
 };
 
 #endif // CURVERENDERER_H

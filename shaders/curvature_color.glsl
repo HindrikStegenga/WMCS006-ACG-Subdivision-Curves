@@ -1,11 +1,27 @@
-#version 410 core
+#version 410
+
 layout (lines_adjacency) in;
-layout (line_strip, max_vertices = 12) out;
+layout (triangle_strip, max_vertices = 12) out;
+
+// Output is a tri strip, since I want to shade the fragments inside it.
+// The geometry shader expands our input lines into a triangle strip.
+
+in VertexData {
+    vec4 color;
+} vIn[4];
+
+out VertexData {
+    vec4 color;
+} vOut;
+
+
+const float PI = 3.1415926535897932384626433832795;
 
 // Accepts two non-zero vectors, return curvature between them
 float computeCurvature(vec4 v0, vec4 v1) {
     float angle = acos(dot(v0, v1));
-    return 2 * sin(angle) / length(v1 - v0);
+    //return 2 * sin(angle) / length(v1 - v0);
+    return PI - angle;
 }
 
 
@@ -66,20 +82,38 @@ void main() {
 
     // Compute the four positions we want to generate a line for.
 
-    gl_Position = v1;
-    EmitVertex();
-    gl_Position = v2;
-    EmitVertex();
-
     VertOpNormal v1v3 = computeVertexOppositeNormal(v1,v2,v3);
-    gl_Position = v2 + v1v3.normal * v1v3.curvature;
-    EmitVertex();
-
     VertOpNormal v0v2 = computeVertexOppositeNormal(v0,v1,v2);
-    gl_Position = v1 + v0v2.normal * v0v2.curvature;
-    EmitVertex();
-    gl_Position = v1;
-    EmitVertex();
-    EndPrimitive();
 
+
+    // We need to generate a triangle strip like this. with cw winding order
+    //   v5-----v6
+    //   |  \   |
+    //   |    \ |
+    //  v1-----v2
+    //
+    // t1 => v1 v5 v2
+    // t2 => v2 v4 v6
+    // Thus output => v1-v5-v2-v6
+    // Where v0 is left adjacent and v3 is right adjacent.
+
+    gl_Position = v1;
+    vOut.color = vec4(((vIn[1].color * v0v2.curvature).xyz), 1.0);
+    EmitVertex();
+
+    gl_Position = v1 + (0.05 * v0v2.normal);
+    vOut.color = vec4(((vIn[1].color * v0v2.curvature).xyz), 1.0);
+    EmitVertex();
+
+
+    gl_Position = v2;
+    vOut.color = vec4(((vIn[2].color * v1v3.curvature).xyz), 1.0);
+    EmitVertex();
+
+
+    gl_Position = v2 + (0.05 * v1v3.normal);
+    vOut.color = vec4(((vIn[2].color * v1v3.curvature).xyz), 1.0);
+    EmitVertex();
+
+    EndPrimitive();
 }

@@ -59,7 +59,7 @@ void CurveNetRenderer::draw(SubdivisionCurve& sc) {
     QVector<QVector2D> netCoords = sc.getNetCoords();
 
     shaderProg->bind();
-    shaderProg->setUniformValue("inputColor", 1.0, 0.0, 0.0);
+    shaderProg->setUniformValue("inputColor", 1.0, 0.0, 0.0, 0.0);
     gl->glBindVertexArray(vao);
 
     // Draw control net
