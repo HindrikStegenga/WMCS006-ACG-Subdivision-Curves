@@ -31,8 +31,8 @@ void generateCircleGeometry(vec4 centre, int steps, float radius) {
 // Accepts two non-zero vectors, return curvature between them
 float computeCurvature(vec4 v0, vec4 v1) {
     float angle = acos(dot(v0, v1));
-    //return 2 * sin(angle) / length(v1 - v0);
-    return PI - angle;
+    return 2 * sin(angle) / length(v1 - v0);
+    //return PI - angle;
 }
 
 
