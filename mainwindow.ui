@@ -71,7 +71,7 @@ QGroupBox::title {
          <x>20</x>
          <y>20</y>
          <width>191</width>
-         <height>91</height>
+         <height>121</height>
         </rect>
        </property>
        <property name="title">
@@ -101,6 +101,19 @@ QGroupBox::title {
         </property>
         <property name="text">
          <string>Curve points</string>
+        </property>
+       </widget>
+       <widget class="QCheckBox" name="showInfluence">
+        <property name="geometry">
+         <rect>
+          <x>20</x>
+          <y>90</y>
+          <width>151</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Influence</string>
         </property>
        </widget>
       </widget>
@@ -223,6 +236,35 @@ QGroupBox::title {
          <string>Circle</string>
         </property>
        </item>
+      </widget>
+      <widget class="QLabel" name="label">
+       <property name="geometry">
+        <rect>
+         <x>30</x>
+         <y>440</y>
+         <width>181</width>
+         <height>261</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Influence for a given &lt;/p&gt;&lt;p&gt;control point is shown if&lt;/p&gt;&lt;p&gt;you select a control point.&lt;br/&gt;&lt;/p&gt;&lt;p&gt;The option to render both &lt;/p&gt;&lt;p&gt;curve points and influence&lt;/p&gt;&lt;p&gt;must also be enabled, &lt;/p&gt;&lt;p&gt;and steps &amp;gt; 0.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="textFormat">
+        <enum>Qt::RichText</enum>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_2">
+       <property name="geometry">
+        <rect>
+         <x>30</x>
+         <y>370</y>
+         <width>60</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Curvature</string>
+       </property>
       </widget>
      </widget>
     </item>

@@ -118,11 +118,13 @@ void MainView::mousePressEvent(QMouseEvent *event) {
             // Add new control point
             subCurve.addPoint(scenePos);
             updateBuffers();
+            update();
         }
         break;
     case Qt::RightButton:
         // Select control point
         settings.selectedPt = subCurve.findClosest(scenePos);
+        updateBuffers();
         update();
         break;
     }

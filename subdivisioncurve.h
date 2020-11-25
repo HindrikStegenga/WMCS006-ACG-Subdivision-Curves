@@ -12,6 +12,7 @@ public:
 
     inline QVector<QVector2D> getNetCoords() { return netCoords; }
     inline QVector<QVector2D> getSubdivisionCoords() { return subdividedCurve; }
+    inline QVector<QVector<QVector2D>> getInfluenceCoords() { return influenceCurves; }
 
     void setMask(QString stringMask);
     void presetNet(int preset);
@@ -28,6 +29,7 @@ private:
     QVector<int> subdivMask, firstStencil, secondStencil;
     int lastSubdivisonSteps;
     QVector<QVector2D> netCoords, subdividedCurve;
+    QVector<QVector<QVector2D>> influenceCurves;
 };
 
 #endif // SUBDIVISIONCURVE_H

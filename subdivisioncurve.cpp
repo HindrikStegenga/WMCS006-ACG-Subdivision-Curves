@@ -2,8 +2,16 @@
 #include <QTextStream>
 #include <QDebug>
 
+// Represents a subdivided point
+struct SubdividedPoint {
+    // Actual computed point
+    QVector2D point;
+    // Associated control point indices
+    QVector<int> controlPointIndices;
+};
 
-QVector<QVector2D> subdivideCurve(QVector<QVector2D>& input, QVector<int>& odd, QVector<int>& even);
+
+QVector<SubdividedPoint> subdivideCurve(QVector<SubdividedPoint>& input, QVector<int>& odd, QVector<int>& even);
 
 SubdivisionCurve::SubdivisionCurve()
 {
@@ -130,17 +138,50 @@ int SubdivisionCurve::findClosest(QVector2D p) {
 
 void SubdivisionCurve::recomputeCurve() {
 
-    int subdivisions = this->lastSubdivisonSteps;
-    QVector<QVector2D> result = netCoords;
+    int subdivisions = this->lastSubdivisonSteps; 
+    QVector<SubdividedPoint> result(netCoords.size());
+    for (int i = 0; i < result.size(); ++i) {
+
+        auto point = SubdividedPoint();
+        auto cpVec = QVector<int>();
+        cpVec.push_back(i);
+        point.point = netCoords[i];
+        point.controlPointIndices = cpVec;
+        result[i] = point;
+    }
+
     for (int i = 0; i < subdivisions; ++i) {
         result = subdivideCurve(result, secondStencil, firstStencil);
     }
-    subdividedCurve = result;
+
+    // Construct the arrays with points controlled by each control point.
+    // This gives only the modified control points, in other words,
+    // the start and end line segments of the controller segments, also move, but the connected control point does not.
+    // It's a bit hard to explain above, but I hope it's clear when you select a point and move it.
+    QVector<QVector<QVector2D>> influenceSegments;
+    for (int i = 0; i < netCoords.size(); ++i) {
+        QVector<QVector2D> influencedPoints;
+        for (int j = 0; j < result.size(); ++j) {
+            if (result[j].controlPointIndices.contains(i)) {
+                influencedPoints.push_back(result[j].point);
+            }
+        }
+        influenceSegments.push_back(influencedPoints);
+    }
+    influenceCurves = influenceSegments;
+
+
+    QVector<QVector2D> result2;
+    for(auto& elem : result) {
+        result2.push_back(elem.point);
+    }
+
+    subdividedCurve = result2;
 }
 
-QVector<QVector2D> subdivideCurve(QVector<QVector2D>& input, QVector<int>& odd, QVector<int>& even) {
-    QVector<QVector2D> result;
-    // Add first point
+QVector<SubdividedPoint> subdivideCurve(QVector<SubdividedPoint>& input, QVector<int>& odd, QVector<int>& even) {
+    QVector<SubdividedPoint> result;
+
     result.push_back(input.first());
 
     // Iterate over input curve points
@@ -151,9 +192,20 @@ QVector<QVector2D> subdivideCurve(QVector<QVector2D>& input, QVector<int>& odd, 
             int denominator = std::accumulate(even.begin(), even.end(), 0);
             QVector2D numerator;
             for (int k = 0; k < even.size(); ++k) {
-                numerator += (input[i + k] * even[k]);
+                numerator += (input[i + k].point * even[k]);
             }
-            result.push_back(numerator / denominator);
+            auto point = SubdividedPoint();
+            point.point = numerator / denominator;
+            point.controlPointIndices = QVector<int>();
+
+            // Generate control point influence data
+            for (int k = 0; k < even.size(); ++k) {
+                for (auto& elem : input[i + k].controlPointIndices) {
+                    point.controlPointIndices.push_back(elem);
+                }
+            }
+
+            result.push_back(point);
         }
 
         // Secondly compute odd stencil if it fits for points up to i + stencil size
@@ -161,13 +213,25 @@ QVector<QVector2D> subdivideCurve(QVector<QVector2D>& input, QVector<int>& odd, 
             int denominator = std::accumulate(odd.begin(), odd.end(), 0);
             QVector2D numerator;
             for (int k = 0; k < odd.size(); ++k) {
-                numerator += (input[i + k] * odd[k]);
+                numerator += (input[i + k].point * odd[k]);
             }
-            result.push_back(numerator / denominator);
+            auto point = SubdividedPoint();
+            point.point = numerator / denominator;
+            point.controlPointIndices = QVector<int>();
+
+            // Generate control point influence data
+            for (int k = 0; k < odd.size(); ++k) {
+                for (auto& elem : input[i + k].controlPointIndices) {
+                    point.controlPointIndices.push_back(elem);
+                }
+            }
+
+            result.push_back(point);
         }
     }
 
-    // Add last point
+
     result.push_back(input.last());
+
     return result;
 }

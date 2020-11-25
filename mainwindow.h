@@ -18,6 +18,7 @@ public:
 private slots:
   void on_controlNet_toggled(bool checked);
   void on_curvePoints_toggled(bool checked);
+  void on_showInfluence_toggled(bool checked);
   void on_netPresets_currentIndexChanged(int index);
   void on_curveShader_currentIndexChanged(int index);
   void on_subdivMask_returnPressed();

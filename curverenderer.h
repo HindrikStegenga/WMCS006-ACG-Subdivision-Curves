@@ -23,6 +23,7 @@ public:
 private:
 
     GLuint vao, vbo;
+    GLuint segmentVao, segmentVbo;
     int currentShader;
     QVector<QOpenGLShaderProgram*> shaders;
 };

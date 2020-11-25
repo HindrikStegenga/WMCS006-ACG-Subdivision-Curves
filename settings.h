@@ -7,7 +7,7 @@ class Settings
 public:
     Settings();
 
-    bool showNet, showCurvePts;
+    bool showNet, showCurvePts, showInfluence;
     int selectedPt;
 };
 

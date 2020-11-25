@@ -34,6 +34,12 @@ void MainWindow::on_curvePoints_toggled(bool checked) {
     ui->mainView->update();
 }
 
+void MainWindow::on_showInfluence_toggled(bool checked) {
+    ui->mainView->settings.showInfluence = checked;
+    ui->mainView->updateBuffers();
+    ui->mainView->update();
+}
+
 void MainWindow::on_netPresets_currentIndexChanged(int index) {
     if (ui->mainView->isValid()) {
         ui->mainView->subCurve.presetNet(index);
