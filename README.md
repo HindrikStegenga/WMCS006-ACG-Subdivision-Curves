@@ -8,3 +8,6 @@ It includes:
 - Curvature visualization using color.
 - Curvature visualization using osculating circles.
 - Control point influence visualization.
+
+It uses OpenGL for rendering.
+Curvature visualizations are generated using Geometry Shaders.
