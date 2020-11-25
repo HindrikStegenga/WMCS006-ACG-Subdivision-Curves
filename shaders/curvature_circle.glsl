@@ -2,6 +2,7 @@
 layout (lines_adjacency) in;
 layout (line_strip, max_vertices = 44) out;
 
+// Input data per vertex. (Excluding position this is in gl_in)
 in VertexData {
     vec4 color;
 } vIn[4];
@@ -13,13 +14,13 @@ out VertexData {
 
 const float PI = 3.1415926535897932384626433832795;
 
-
+// Generates the circle geometry we need
 void generateCircleGeometry(vec4 centre, int steps, float radius) {
 
     for (int i = 0; i <= steps; i++) {
         // Angle between each side in radians
         float ang = (PI * 2.0) / steps * i;
-
+        // Compute offset from centre point
         vec4 offset = vec4(cos(ang) * radius, -sin(ang) * radius, 0.0, 0.0);
         gl_Position = centre + offset;
         EmitVertex();
@@ -32,7 +33,6 @@ void generateCircleGeometry(vec4 centre, int steps, float radius) {
 float computeCurvature(vec4 v0, vec4 v1) {
     float angle = acos(dot(v0, v1));
     return 2 * sin(angle) / length(v1 - v0);
-    //return PI - angle;
 }
 
 
@@ -96,6 +96,7 @@ void main() {
     VertOpNormal v1v3 = computeVertexOppositeNormal(v1,v2,v3);
     VertOpNormal v0v2 = computeVertexOppositeNormal(v0,v1,v2);
 
+    // Generate the line segment.
     gl_Position = v1;
     vOut.color = vIn[1].color;
     EmitVertex();
@@ -104,14 +105,8 @@ void main() {
     EmitVertex();
     EndPrimitive();
 
-//    gl_Position = v1;
-//    vOut.color = vIn[1].color;
-//    EmitVertex();
-//    gl_Position = v1 + (v0v2.normal * 0.1);
-//    vOut.color = vIn[1].color;
-//    EmitVertex();
-//    EndPrimitive();
-
+    // Generate the circle geometry along the normals.
+    // I just take a constant of 20 segments for the circle.
     generateCircleGeometry(v1 - (v0v2.normal * v0v2.curvature), 20, v0v2.curvature);
     generateCircleGeometry(v2 - (v1v3.normal * v1v3.curvature), 20, v1v3.curvature);
 }

@@ -4,11 +4,16 @@ CurveRenderer::~CurveRenderer() {
 
 }
 
+
+void CurveRenderer::setShaderIndex(int idx) {
+    currentShader = idx;
+}
+
 QVector<QVector2D> computeAdjacencyBuffer(QVector<QVector2D> input);
 void CurveRenderer::init(QOpenGLFunctions_4_1_Core* f, Settings* s) {
     gl = f;
     settings = s;
-    currentShader = 2;
+    currentShader = 0;
     initShaders();
     initBuffers();
 }

@@ -1,11 +1,12 @@
 #version 410
 
 layout (lines_adjacency) in;
-layout (triangle_strip, max_vertices = 32) out;
+layout (triangle_strip, max_vertices = 4) out;
 
 // Output is a tri strip, since I want to shade the fragments inside it.
 // The geometry shader expands our input lines into a triangle strip.
 
+// Input data per vertex. (Excluding position this is in gl_in)
 in VertexData {
     vec4 color;
 } vIn[4];
@@ -20,7 +21,6 @@ const float PI = 3.1415926535897932384626433832795;
 // Accepts two non-zero vectors, return curvature between them
 float computeCurvature(vec4 v0, vec4 v1) {
     float angle = acos(dot(v0, v1));
-    //return 2 * sin(angle) / length(v1 - v0);
     return PI - angle;
 }
 
@@ -96,6 +96,7 @@ void main() {
     // t2 => v2 v4 v6
     // Thus output => v1-v5-v2-v6
     // Where v0 is left adjacent and v3 is right adjacent.
+    // Adjusting interpolated color based on curvature.
 
     gl_Position = v1;
     vOut.color = vec4(0.0, v0v2.curvature, 1.0, 1.0);

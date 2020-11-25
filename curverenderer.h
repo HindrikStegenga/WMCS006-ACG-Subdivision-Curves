@@ -16,6 +16,7 @@ public:
     void initShaders();
     void initBuffers();
 
+    void setShaderIndex(int idx);
     void updateBuffers(SubdivisionCurve& sc);
     void draw(SubdivisionCurve& sc);
 

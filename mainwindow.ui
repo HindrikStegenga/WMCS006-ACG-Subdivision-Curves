@@ -194,6 +194,36 @@ QGroupBox::title {
         <string>1 4 6 4 1</string>
        </property>
       </widget>
+      <widget class="QComboBox" name="curveShader">
+       <property name="geometry">
+        <rect>
+         <x>40</x>
+         <y>390</y>
+         <width>141</width>
+         <height>24</height>
+        </rect>
+       </property>
+       <item>
+        <property name="text">
+         <string>None</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Comb</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Color</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Circle</string>
+        </property>
+       </item>
+      </widget>
      </widget>
     </item>
     <item>

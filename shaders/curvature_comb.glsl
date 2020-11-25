@@ -2,6 +2,7 @@
 layout (lines_adjacency) in;
 layout (line_strip, max_vertices = 12) out;
 
+// Input data per vertex. (Excluding position this is in gl_in)
 in VertexData {
     vec4 color;
 } vIn[4];
@@ -16,7 +17,6 @@ const float PI = 3.1415926535897932384626433832795;
 // Accepts two non-zero vectors, return curvature between them
 float computeCurvature(vec4 v0, vec4 v1) {
     float angle = acos(dot(v0, v1));
-    //return 2 * sin(angle) / length(v1 - v0);
     return PI - angle;
 }
 
@@ -77,6 +77,9 @@ void main() {
     vec4 v3 = gl_in[3].gl_Position;
 
     // Compute the four positions we want to generate a line for.
+    // Generating line segments as we go.
+    // We want a comb from v1 - v1normal - v2normal - v2.
+    // Therefore curvature is multiplied with the normal at the vertex (v1 or v2).
 
     gl_Position = v1;
     vOut.color = vIn[1].color;
@@ -85,11 +88,13 @@ void main() {
     vOut.color = vIn[2].color;
     EmitVertex();
 
+    // VertOpNormal includes the curvature.
     VertOpNormal v1v3 = computeVertexOppositeNormal(v1,v2,v3);
     gl_Position = v2 + v1v3.normal * v1v3.curvature;
     vOut.color = vIn[2].color;
     EmitVertex();
 
+    // VertOpNormal includes the curvature.
     VertOpNormal v0v2 = computeVertexOppositeNormal(v0,v1,v2);
     gl_Position = v1 + v0v2.normal * v0v2.curvature;
     vOut.color = vIn[1].color;

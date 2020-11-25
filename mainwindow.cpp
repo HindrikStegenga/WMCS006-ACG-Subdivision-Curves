@@ -55,3 +55,10 @@ void MainWindow::on_subdivSteps_valueChanged(int arg1) {
     ui->mainView->updateBuffers();
     ui->mainView->update();
 }
+
+void MainWindow::on_curveShader_currentIndexChanged(int arg1) {
+    ui->mainView->curveRenderer.setShaderIndex(arg1);
+    ui->mainView->updateBuffers();
+    ui->mainView->update();
+}
+
