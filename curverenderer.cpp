@@ -8,7 +8,7 @@ QVector<QVector2D> computeAdjacencyBuffer(QVector<QVector2D> input);
 void CurveRenderer::init(QOpenGLFunctions_4_1_Core* f, Settings* s) {
     gl = f;
     settings = s;
-    currentShader = 1;
+    currentShader = 2;
     initShaders();
     initBuffers();
 }
@@ -110,7 +110,6 @@ QVector<QVector2D> computeAdjacencyBuffer(QVector<QVector2D> input) {
     buffer.push_back(input.first());
 
     for(int i = 0; i < input.size(); ++i) {
-        //buffer.push_back(input[i - 1]);
         buffer.push_back(input[i]);
     }
     buffer.push_back(input.back());

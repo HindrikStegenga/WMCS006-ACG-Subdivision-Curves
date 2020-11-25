@@ -1,7 +1,7 @@
 #version 410
 
 layout (lines_adjacency) in;
-layout (triangle_strip, max_vertices = 12) out;
+layout (triangle_strip, max_vertices = 32) out;
 
 // Output is a tri strip, since I want to shade the fragments inside it.
 // The geometry shader expands our input lines into a triangle strip.
@@ -14,7 +14,7 @@ out VertexData {
     vec4 color;
 } vOut;
 
-
+const float curveWidth = 0.015;
 const float PI = 3.1415926535897932384626433832795;
 
 // Accepts two non-zero vectors, return curvature between them
@@ -98,21 +98,21 @@ void main() {
     // Where v0 is left adjacent and v3 is right adjacent.
 
     gl_Position = v1;
-    vOut.color = vec4(((vIn[1].color * v0v2.curvature).xyz), 1.0);
+    vOut.color = vec4(0.0, v0v2.curvature, 1.0, 1.0);
     EmitVertex();
 
-    gl_Position = v1 + (0.05 * v0v2.normal);
-    vOut.color = vec4(((vIn[1].color * v0v2.curvature).xyz), 1.0);
+    gl_Position = v1 + (curveWidth * v0v2.normal);
+    vOut.color = vec4(0.0, v0v2.curvature, 1.0, 1.0);
     EmitVertex();
 
 
     gl_Position = v2;
-    vOut.color = vec4(((vIn[2].color * v1v3.curvature).xyz), 1.0);
+    vOut.color = vec4(0.0, v1v3.curvature, 1.0, 1.0);
     EmitVertex();
 
 
-    gl_Position = v2 + (0.05 * v1v3.normal);
-    vOut.color = vec4(((vIn[2].color * v1v3.curvature).xyz), 1.0);
+    gl_Position = v2 + (curveWidth * v1v3.normal);
+    vOut.color = vec4(0.0, v1v3.curvature, 1.0, 1.0);
     EmitVertex();
 
     EndPrimitive();
