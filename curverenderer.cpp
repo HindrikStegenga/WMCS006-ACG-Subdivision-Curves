@@ -8,7 +8,7 @@ QVector<QVector2D> computeAdjacencyBuffer(QVector<QVector2D> input);
 void CurveRenderer::init(QOpenGLFunctions_4_1_Core* f, Settings* s) {
     gl = f;
     settings = s;
-    currentShader = 2;
+    currentShader = 1;
     initShaders();
     initBuffers();
 }
@@ -17,6 +17,13 @@ void CurveRenderer::initShaders() {
 
     //we use the qt wrapper functions for shader objects
     //This is the shader generating curvature combs
+
+    auto curvatureShader = new QOpenGLShaderProgram();
+    curvatureShader->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shaders/vertshader.glsl");
+    curvatureShader->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shaders/fragshader.glsl");
+    curvatureShader->link();
+
+    shaders.append(curvatureShader);
 
     auto curvatureCombShader = new QOpenGLShaderProgram();
     curvatureCombShader->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shaders/vertshader.glsl");

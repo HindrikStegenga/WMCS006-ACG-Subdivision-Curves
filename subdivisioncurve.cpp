@@ -140,26 +140,34 @@ void SubdivisionCurve::recomputeCurve() {
 
 QVector<QVector2D> subdivideCurve(QVector<QVector2D>& input, QVector<int>& odd, QVector<int>& even) {
     QVector<QVector2D> result;
+    // Add first point
     result.push_back(input.first());
 
-    for (int i = 1; i < input.size(); ++ i) {
-        int denominator = 0;
-        for (int j = 0; j < even.size(); ++j) {
-            denominator += even[j];
-        }
-        QVector2D nominator = (input[i - 1] * even[0]) + (input[i] * even[1]);
-        result.push_back(nominator / denominator);
+    // Iterate over input curve points
+    for (int i = 0; i < input.size(); ++ i) {
 
-        if (i != input.size() - 1) {
-            int denominator = 0;
-            for (int j = 0; j < odd.size(); ++j) {
-                denominator += odd[j];
+        // First compute even stencil if it fits for points up to i + stencil size
+        if (i + even.size() - 1 < input.size()) {
+            int denominator = std::accumulate(even.begin(), even.end(), 0);
+            QVector2D numerator;
+            for (int k = 0; k < even.size(); ++k) {
+                numerator += (input[i + k] * even[k]);
             }
-            QVector2D nominator = (input[i - 1] * odd[0]) + (input[i] * odd[1]) + (input[i + 1] * odd[2]);
-            result.push_back(nominator / denominator);
+            result.push_back(numerator / denominator);
+        }
+
+        // Secondly compute odd stencil if it fits for points up to i + stencil size
+        if (i + odd.size() - 1 < input.size()) {
+            int denominator = std::accumulate(odd.begin(), odd.end(), 0);
+            QVector2D numerator;
+            for (int k = 0; k < odd.size(); ++k) {
+                numerator += (input[i + k] * odd[k]);
+            }
+            result.push_back(numerator / denominator);
         }
     }
 
+    // Add last point
     result.push_back(input.last());
     return result;
 }
